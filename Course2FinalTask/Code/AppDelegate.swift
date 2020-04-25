@@ -34,9 +34,14 @@ private extension AppDelegate {
         profileViewController.tabBarItem.image = imageProfileViewController
         let profileNavigationController = UINavigationController(rootViewController: profileViewController)
         
+        let newPostViewController = NewPostViewController.initFromNib()
+        newPostViewController.tabBarController?.title = ControllerSet.newPostViewController
+        newPostViewController.tabBarItem.image = imageNewPostViewController
+        let newNavigationController = UINavigationController(rootViewController: newPostViewController)
+        
         let tabBarController = UITabBarController()
         tabBarController.tabBar.backgroundColor = viewBackgroundColor
-        tabBarController.setViewControllers([feedNavigationController, profileNavigationController], animated: false)
+        tabBarController.setViewControllers([feedNavigationController, newNavigationController, profileNavigationController], animated: false)
         
         window?.rootViewController = tabBarController
         window?.makeKeyAndVisible()
