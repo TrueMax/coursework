@@ -12,7 +12,7 @@ import DataProvider
 final class ProfileViewController: UIViewController, NibInit {
     
     var userProfile: User?
-    var postsProfile: [Post]?
+    var postsProfile: [Post] = []
     
     @IBOutlet weak private var profileCollectionView: UICollectionView! {
         willSet {
@@ -23,7 +23,7 @@ final class ProfileViewController: UIViewController, NibInit {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         setupViewController()
     }
 }
@@ -71,7 +71,9 @@ extension ProfileViewController: UICollectionViewDelegateFlowLayout {
             assertionFailure()
             return  }
         
-        view.setHeader(user: selectUser(user: userProfile))
+        //        view.setHeader(user: selectUser(user: userProfile))
+        guard let userProfile = userProfile else { return }
+        view.setHeader(user: userProfile)
         view.delegate = self
     }
     
@@ -85,13 +87,19 @@ extension ProfileViewController: UICollectionViewDelegateFlowLayout {
 extension ProfileViewController {
     
     func setupViewController() {
-        if userProfile == nil {
-            userProfile = currentUser
-        }
+        //        if userProfile == nil {
+        //            userProfile = currentUser
+        //        }
         view.backgroundColor = viewBackgroundColor
         title = userProfile?.username
         tabBarItem.title = ControllerSet.profileViewController
-        postsProfile = posts.findPosts(by: selectUser(user: userProfile).id)
+        //        postsProfile = posts.findPosts(by: selectUser(user: userProfile).id)
+        guard let userProfile = userProfile?.id else { return }
+        dataProvidersPosts.findPosts(by: userProfile, queue: queue) { post in
+            guard let post = post else { return }
+            self.postsProfile = post
+            
+        }
     }
 }
 
@@ -99,19 +107,36 @@ extension ProfileViewController {
 extension ProfileViewController: ProfileHeaderDelegate {
     
     func openFollowersList() {
-        guard let followers = users.usersFollowedByUser(with: selectUser(user: userProfile).id) else { return }
         let userListViewController = UserListViewController.initFromNib()
-        
-        userListViewController.usersList = followers
-        userListViewController.navigationItemTitle = NamesItemTitle.followers
-        self.navigationController?.pushViewController(userListViewController, animated: true)
+        //        guard let followers = dataProvidersUser.usersFollowedByUser(with: selectUser(user: userProfile).id) else { return }
+        guard let userProfile = userProfile?.id else { return }
+    
+        dataProvidersUser.usersFollowedByUser(with: userProfile, queue: queue) { users in
+            guard let users = users else { return }
+            userListViewController.usersList = users
+            
+            userListViewController.navigationItemTitle = NamesItemTitle.followers
+            self.navigationController?.pushViewController(userListViewController, animated: true)
+        }
+        //        userListViewController.usersList = followers
+        //        userListViewController.navigationItemTitle = NamesItemTitle.followers
+        //        self.navigationController?.pushViewController(userListViewController, animated: true)
     }
     
     func openFollowingList() {
-        guard let following = users.usersFollowingUser(with: selectUser(user: userProfile).id) else { return }
         let userListViewController = UserListViewController.initFromNib()
-        userListViewController.usersList = following
-        userListViewController.navigationItemTitle = NamesItemTitle.following
-        self.navigationController?.pushViewController(userListViewController, animated: true)
+        guard let userProfile = userProfile?.id else { return }
+        dataProvidersUser.usersFollowingUser(with: userProfile, queue: queue, handler: { users in
+            guard let users = users else { return }
+            
+            userListViewController.usersList = users
+            userListViewController.navigationItemTitle = NamesItemTitle.following
+            self.navigationController?.pushViewController(userListViewController, animated: true)
+        })
+        
+        //        userListViewController.usersList = following
+        //        userListViewController.navigationItemTitle = NamesItemTitle.following
+        //        self.navigationController?.pushViewController(userListViewController, animated: true)
+        
     }
 }

@@ -8,17 +8,33 @@
 
 import DataProvider
 
+public let queue = DispatchQueue.global(qos: .utility)
+
+public let userHandler: ((User?) -> Void) = { user in
+    guard let user = user else { return }
+}
+
+public let postsHandler: (([Post]?) -> Void) = { posts in
+    guard let posts = posts else { return }
+    
+}
+
+
+func userNew(user: User?) {
+    
+}
+
 /// Поставщик публикаций
-public let posts = DataProviders.shared.postsDataProvider
+public let dataProvidersPosts = DataProviders.shared.postsDataProvider
 
 /// Поставщик пользователей
-public let users = DataProviders.shared.usersDataProvider
+public let dataProvidersUser = DataProviders.shared.usersDataProvider
 
 /// Текущий пользователь
-public let currentUser = users.currentUser()
+//public let currentUser: () = users.currentUser(queue: queue, handler: userHandler)
 
 /// Массив постов. Массив пустой если нет постов или текущий пользователь ни на кого не подписан.
-public var postsFeed = posts.feed()
+//public var postsFeed: () = posts.feed(queue: queue, handler: postsHandler)
 
 /// Развертывание опционала для публикаций
 func selectPosts(posts: [Post]?) -> [Post] {
@@ -26,11 +42,13 @@ func selectPosts(posts: [Post]?) -> [Post] {
     return posts
 }
 
+
 /// Развертывание опционала для пользователя
-func selectUser(user: User?) -> User {
-    guard let user = user else { return currentUser }
-    return user
-}
+//func selectUser(user: User?) -> () {
+//    guard let user = user else { return currentUser }
+//    var selectUser: User
+//    selectUser = user
+//}
 
 func selectUsers(users: [User]?) -> [User] {
     guard let users = users else {

@@ -9,7 +9,11 @@
 import UIKit
 import DataProvider
 
+
 final class FeedViewController: UIViewController, NibInit {
+    
+    var currentUser: User?
+    var postsArray: [Post] = []
     
     @IBOutlet weak private var feedCollectionView: UICollectionView!
         {
@@ -34,7 +38,8 @@ final class FeedViewController: UIViewController, NibInit {
 //MARK: DataSource
 extension FeedViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        postsFeed.count
+        //        postsFeed.count
+        postsArray.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -51,15 +56,25 @@ extension FeedViewController: UICollectionViewDelegateFlowLayout {
             assertionFailure()
             return
         }
-        let post = postsFeed[indexPath.row]
+        //        let post = postsFeed[indexPath.row]
+        let post = postsArray[indexPath.row]
         cell.setupFeed(post: post)
         cell.delegate = self
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let width = collectionView.frame.width
-        let post = posts.feed()[indexPath.row]
-        let estimatedFrame = NSString(string: post.description).boundingRect(with: CGSize(width: width - 8, height: width - 8), options: .usesLineFragmentOrigin, attributes: nil, context: nil)
+        //        let post = posts.feed(queue: <#DispatchQueue?#>, handler: <#([Post]?) -> Void#>)[indexPath.row]
+        //        let post: () =
+        dataProvidersPosts.feed(queue: queue) { posts in
+            guard let posts = posts else {
+                self.postsArray = []
+                return
+            }
+            
+            self.postsArray = posts
+        }
+        let estimatedFrame = NSString(string: postsArray.description).boundingRect(with: CGSize(width: width - 8, height: width - 8), options: .usesLineFragmentOrigin, attributes: nil, context: nil)
         return CGSize(width: width, height: estimatedFrame.height + width + 130)
     }
 }
@@ -69,57 +84,110 @@ extension FeedViewController: FeedCollectionViewProtocol {
     
     /// открывает профиль пользователя
     func openUserProfile(cell: FeedCollectionViewCell) {
-        
+        let profileViewController = ProfileViewController.initFromNib()
         guard let indexPath = feedCollectionView.indexPath(for: cell) else { return }
         
-        let currentPost = postsFeed[indexPath.row]
+        let currentPost = postsArray[indexPath.row]
         
-        guard let author = users.user(with: currentPost.author) else { return }
+        //        guard let author = dataProvidersUser.user(with: currentPost.author) else { return }
         
-        let authorPosts = posts.findPosts(by: author.id)
         
-        let profileViewController = ProfileViewController.initFromNib()
-        profileViewController.userProfile = author
-        profileViewController.postsProfile = authorPosts
+        
+        dataProvidersUser.user(with: currentPost.author, queue: queue, handler: { user in
+            guard let user = user else { return }
+            profileViewController.userProfile = user
+//            self.author = user
+        })
+        
+        guard let authorID = profileViewController.userProfile?.id else { return }
+        
+        //        let authorPosts = postsArray.findPosts(by: author.id)
+        dataProvidersPosts.findPosts(by: authorID, queue: queue) { posts in
+            guard let posts = posts else { return }
+            profileViewController.postsProfile = posts
+//            self.postsArray = posts
+        }
+        
+//        let profileViewController = ProfileViewController.initFromNib()
+//        profileViewController.userProfile = author
+//        profileViewController.postsProfile = postsArray
         
         self.navigationController?.pushViewController(profileViewController, animated: true)
     }
     /// ставит лайк на публикацию
     func likePost(cell: FeedCollectionViewCell) {
+
         guard let indexPath = feedCollectionView.indexPath(for: cell) else { return }
         
-        let postID = postsFeed[indexPath.row].id
+        dataProvidersPosts.feed(queue: queue) { post in
+            guard let post = post else { return }
+            self.postsArray = post
+        }
+        
+        let postID = postsArray[indexPath.row].id
+        dataProvidersPosts.unlikePost(with: postID, queue: queue) { unlikePost in
+            guard let unlikePost = unlikePost else { return }
+//            self = unlikePost
+           
+        }
+        
+        dataProvidersPosts.likePost(with: postID, queue: queue) { likePost in
+            guard let unlikePost = likePost else { return }
+//            self.post = unlikePost
+        }
         
         guard cell.likeButton.tintColor == lightGrayColor else {
-            if posts.unlikePost(with: postID) {
-                postsFeed[indexPath.row].currentUserLikesThisPost = false
-                postsFeed[indexPath.row].likedByCount -= 1
-                cell.tintColor = lightGrayColor
-                feedCollectionView.reloadData()
-            }
+//            guard post.currentUserLikesThisPost else { return }
+            postsArray[indexPath.row].currentUserLikesThisPost = false
+            postsArray[indexPath.row].likedByCount -= 1
+            cell.tintColor = lightGrayColor
+            feedCollectionView.reloadData()
             return
         }
-        if posts.likePost(with: postID) {
-            postsFeed[indexPath.row].currentUserLikesThisPost = true
-            postsFeed[indexPath.row].likedByCount += 1
-            cell.tintColor = defaultTintColor
-            feedCollectionView.reloadData()
-        }
+        
+//        guard !post.currentUserLikesThisPost else { return }
+        postsArray[indexPath.row].currentUserLikesThisPost = true
+        postsArray[indexPath.row].likedByCount += 1
+        cell.tintColor = defaultTintColor
+        feedCollectionView.reloadData()
+
     }
     
     /// открывает список пользователей поставивших лайк
     func userList(cell: FeedCollectionViewCell) {
         
+        /// массив пользователей поставивших лайк
         var userMarkerPost = [User]()
+//        var userID: User.Identifier
+//        var foundUser1: User
         
         guard let indexPath = feedCollectionView.indexPath(for: cell) else { return }
         
-        let currentPostID = postsFeed[indexPath.row].id
+        dataProvidersPosts.feed(queue: queue) { post in
+            guard let post = post else { return }
+            self.postsArray = post
+        }
         
-        guard let usersID = posts.usersLikedPost(with: currentPostID) else { return }
+//        let currentPostID = postsFeed[indexPath.row].id
+         let currentPostID = postsArray[indexPath.row].id
         
-        userMarkerPost = usersID.compactMap{ currentUserID in
-            users.user(with: currentUserID) }
+        dataProvidersPosts.usersLikedPost(with: currentPostID, queue: queue) { usersArray in
+            guard let usersArray = usersArray else { return }
+            userMarkerPost = usersArray
+        }
+        
+//        guard let usersID = posts.usersLikedPost(with: currentPostID) else { return }
+        
+//        userMarkerPost = usersID.compactMap{ currentUserID in
+//            dataProvidersUser.user(with: currentUserID) }
+        
+//        userMarkerPost.forEach { user in
+//            dataProvidersUser.user(with: user.id, queue: queue) { foundUser in
+//                guard let user = foundUser else { return }
+//                foundUser1 = user
+//            }
+//        }
+        
         
         guard !userMarkerPost.isEmpty else { return }
         

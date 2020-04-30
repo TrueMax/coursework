@@ -27,11 +27,6 @@ final class FeedCollectionViewCell: UICollectionViewCell, NibInit {
     @IBOutlet private var containerStackView: UIStackView!
     
     @IBOutlet private var bigLike: UIImageView!
-//    {
-//        willSet {
-//            newValue.alpha = 0
-//        }
-//    }
     
     @IBOutlet private var cellConstraintsWidthConstraint: NSLayoutConstraint! {
         willSet {
