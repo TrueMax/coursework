@@ -31,6 +31,18 @@ final class FeedViewController: UIViewController, NibInit {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+           dataProvidersPosts.feed(queue: queue) { posts in
+                 guard let posts = posts else { return }
+            print(posts.count)
+            self.postsArray = posts
+            DispatchQueue.main.async {
+                print("Test")
+                
+                self.feedCollectionView.reloadData()
+            }
+                 
+             }
+        
         title = ControllerSet.feedViewController
     }
 }
@@ -38,8 +50,7 @@ final class FeedViewController: UIViewController, NibInit {
 //MARK: DataSource
 extension FeedViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        //        postsFeed.count
-        postsArray.count
+        return postsArray.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -57,24 +68,29 @@ extension FeedViewController: UICollectionViewDelegateFlowLayout {
             return
         }
         //        let post = postsFeed[indexPath.row]
+        dataProvidersPosts.feed(queue: queue) { posts in
+            guard let posts = posts else { return }
+            self.postsArray = posts
+        }
         let post = postsArray[indexPath.row]
-        cell.setupFeed(post: post)
-        cell.delegate = self
+  
+            cell.setupFeed(post: post)
+            cell.delegate = self
+
+        
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let width = collectionView.frame.width
-        //        let post = posts.feed(queue: <#DispatchQueue?#>, handler: <#([Post]?) -> Void#>)[indexPath.row]
-        //        let post: () =
+        
         dataProvidersPosts.feed(queue: queue) { posts in
-            guard let posts = posts else {
-                self.postsArray = []
-                return
-            }
-            
+            guard let posts = posts else { return }
             self.postsArray = posts
         }
-        let estimatedFrame = NSString(string: postsArray.description).boundingRect(with: CGSize(width: width - 8, height: width - 8), options: .usesLineFragmentOrigin, attributes: nil, context: nil)
+        
+        let post = postsArray[indexPath.row]
+        let estimatedFrame = NSString(string: post.description).boundingRect(with: CGSize(width: width - 8, height: width - 8), options: .usesLineFragmentOrigin, attributes: nil, context: nil)
+       
         return CGSize(width: width, height: estimatedFrame.height + width + 130)
     }
 }
@@ -89,14 +105,12 @@ extension FeedViewController: FeedCollectionViewProtocol {
         
         let currentPost = postsArray[indexPath.row]
         
-        //        guard let author = dataProvidersUser.user(with: currentPost.author) else { return }
-        
-        
         
         dataProvidersUser.user(with: currentPost.author, queue: queue, handler: { user in
             guard let user = user else { return }
+            
             profileViewController.userProfile = user
-//            self.author = user
+            
         })
         
         guard let authorID = profileViewController.userProfile?.id else { return }
@@ -105,18 +119,18 @@ extension FeedViewController: FeedCollectionViewProtocol {
         dataProvidersPosts.findPosts(by: authorID, queue: queue) { posts in
             guard let posts = posts else { return }
             profileViewController.postsProfile = posts
-//            self.postsArray = posts
+            
         }
         
-//        let profileViewController = ProfileViewController.initFromNib()
-//        profileViewController.userProfile = author
-//        profileViewController.postsProfile = postsArray
+        //        let profileViewController = ProfileViewController.initFromNib()
+        //        profileViewController.userProfile = author
+        //        profileViewController.postsProfile = postsArray
         
         self.navigationController?.pushViewController(profileViewController, animated: true)
     }
     /// ставит лайк на публикацию
     func likePost(cell: FeedCollectionViewCell) {
-
+        
         guard let indexPath = feedCollectionView.indexPath(for: cell) else { return }
         
         dataProvidersPosts.feed(queue: queue) { post in
@@ -127,17 +141,17 @@ extension FeedViewController: FeedCollectionViewProtocol {
         let postID = postsArray[indexPath.row].id
         dataProvidersPosts.unlikePost(with: postID, queue: queue) { unlikePost in
             guard let unlikePost = unlikePost else { return }
-//            self = unlikePost
-           
+            //            self = unlikePost
+            
         }
         
         dataProvidersPosts.likePost(with: postID, queue: queue) { likePost in
             guard let unlikePost = likePost else { return }
-//            self.post = unlikePost
+            //            self.post = unlikePost
         }
         
         guard cell.likeButton.tintColor == lightGrayColor else {
-//            guard post.currentUserLikesThisPost else { return }
+            //            guard post.currentUserLikesThisPost else { return }
             postsArray[indexPath.row].currentUserLikesThisPost = false
             postsArray[indexPath.row].likedByCount -= 1
             cell.tintColor = lightGrayColor
@@ -145,12 +159,12 @@ extension FeedViewController: FeedCollectionViewProtocol {
             return
         }
         
-//        guard !post.currentUserLikesThisPost else { return }
+        //        guard !post.currentUserLikesThisPost else { return }
         postsArray[indexPath.row].currentUserLikesThisPost = true
         postsArray[indexPath.row].likedByCount += 1
         cell.tintColor = defaultTintColor
         feedCollectionView.reloadData()
-
+        
     }
     
     /// открывает список пользователей поставивших лайк
@@ -158,8 +172,8 @@ extension FeedViewController: FeedCollectionViewProtocol {
         
         /// массив пользователей поставивших лайк
         var userMarkerPost = [User]()
-//        var userID: User.Identifier
-//        var foundUser1: User
+        //        var userID: User.Identifier
+        //        var foundUser1: User
         
         guard let indexPath = feedCollectionView.indexPath(for: cell) else { return }
         
@@ -168,25 +182,25 @@ extension FeedViewController: FeedCollectionViewProtocol {
             self.postsArray = post
         }
         
-//        let currentPostID = postsFeed[indexPath.row].id
-         let currentPostID = postsArray[indexPath.row].id
+        //        let currentPostID = postsFeed[indexPath.row].id
+        let currentPostID = postsArray[indexPath.row].id
         
         dataProvidersPosts.usersLikedPost(with: currentPostID, queue: queue) { usersArray in
             guard let usersArray = usersArray else { return }
             userMarkerPost = usersArray
         }
         
-//        guard let usersID = posts.usersLikedPost(with: currentPostID) else { return }
+        //        guard let usersID = posts.usersLikedPost(with: currentPostID) else { return }
         
-//        userMarkerPost = usersID.compactMap{ currentUserID in
-//            dataProvidersUser.user(with: currentUserID) }
+        //        userMarkerPost = usersID.compactMap{ currentUserID in
+        //            dataProvidersUser.user(with: currentUserID) }
         
-//        userMarkerPost.forEach { user in
-//            dataProvidersUser.user(with: user.id, queue: queue) { foundUser in
-//                guard let user = foundUser else { return }
-//                foundUser1 = user
-//            }
-//        }
+        //        userMarkerPost.forEach { user in
+        //            dataProvidersUser.user(with: user.id, queue: queue) { foundUser in
+        //                guard let user = foundUser else { return }
+        //                foundUser1 = user
+        //            }
+        //        }
         
         
         guard !userMarkerPost.isEmpty else { return }
