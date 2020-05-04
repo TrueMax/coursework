@@ -18,6 +18,7 @@ final class ProfileViewController: UIViewController, NibInit {
     }
     
     private var postsProfile: [Post]?
+    var postsProfile: [Post]?
     
     @IBOutlet weak private var profileCollectionView: UICollectionView! {
         willSet {
@@ -29,9 +30,16 @@ final class ProfileViewController: UIViewController, NibInit {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        setupViewController()
         
+        
+        
+        
+
+     setupViewController()
+
     }
+    
+
 }
 
 //MARK: DataSourse
@@ -39,6 +47,7 @@ extension ProfileViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         guard let postsProfile = postsProfile else { return [Post]().count }
+        print(postsProfile.count)
         return postsProfile.count
     }
     
@@ -68,7 +77,9 @@ extension ProfileViewController: UICollectionViewDelegateFlowLayout {
             assertionFailure()
             return
         }
+       
         
+
         guard let postsProfile = postsProfile else { return }
         let post = postsProfile[indexPath.row]
         /// установка изображений
@@ -98,11 +109,22 @@ extension ProfileViewController {
     
     func setupViewController() {
         
+        
         if userProfile == nil {
+            
             dataProvidersUser.currentUser(queue: queue) { [weak self] user in
                 guard let user = user else { return }
+                print(user)
                 self?.userProfile = user
+
+//                DispatchQueue.main.async {
+//                    self?.view.backgroundColor = viewBackgroundColor
+//                    self?.title = self?.userProfile?.username
+//                    self?.tabBarItem.title = ControllerSet.profileViewController
+//                    self?.profileCollectionView.reloadData()
+//                }
             }
+        
             
             DispatchQueue.main.async {
                       self.view.backgroundColor = viewBackgroundColor
@@ -110,10 +132,23 @@ extension ProfileViewController {
                   }
         }
         
-        guard let userProfile = userProfile?.id else { return }
+        DispatchQueue.main.async {
+            self.view.backgroundColor = viewBackgroundColor
+            self.title = self.userProfile?.username
+            self.tabBarItem.title = ControllerSet.profileViewController
+            self.profileCollectionView.reloadData()
+//        view.backgroundColor = viewBackgroundColor
+//        title = userProfile?.username
+//        tabBarItem.title = ControllerSet.profileViewController
         
         dataProvidersPosts.findPosts(by: userProfile, queue: queue) { [weak self] post in
+        guard let userProfile = userProfile?.id else {
+            print("ТУТУТУ")
+            return }
+        dataProvidersPosts.findPosts(by: userProfile, queue: queue) { [weak self] post in
+
             guard let post = post else { return }
+            print("findPosts \(post)")
             self?.postsProfile = post
             
             DispatchQueue.main.async {
@@ -121,6 +156,9 @@ extension ProfileViewController {
                 self?.title = self?.userProfile?.username
                 self?.profileCollectionView.reloadData()
             }
+                self?.profileCollectionView.reloadData()
+            }
+
         }
     }
 }
@@ -132,6 +170,8 @@ extension ProfileViewController: ProfileHeaderDelegate {
         let userListViewController = UserListViewController.initFromNib()
         
         guard let userProfile = userProfile?.id else { return }
+   
+        
         dataProvidersUser.usersFollowedByUser(with: userProfile, queue: queue) { users in
             guard let users = users else { return }
             userListViewController.usersList = users

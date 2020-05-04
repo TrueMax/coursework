@@ -50,9 +50,9 @@ public let dataProvidersUser = DataProviders.shared.usersDataProvider
 //    selectUser = user
 //}
 
-func selectUsers(users: [User]?) -> [User] {
-    guard let users = users else {
-        return [User]()
-    }
-    return users
-}
+//func selectUsers(users: [User]?) -> [User] {
+//    guard let users = users else {
+//        return [User]()
+//    }
+//    return users
+//}
