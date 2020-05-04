@@ -8,16 +8,16 @@
 
 import DataProvider
 
-public let queue = DispatchQueue.global(qos: .utility)
-
-public let userHandler: ((User?) -> Void) = { user in
-    guard let user = user else { return }
-}
-
-public let postsHandler: (([Post]?) -> Void) = { posts in
-    guard let posts = posts else { return }
-    
-}
+public let queue = DispatchQueue.global(qos: .userInitiated)
+//
+//public let userHandler: ((User?) -> Void) = { user in
+//    guard let user = user else { return }
+//}
+//
+//public let postsHandler: (([Post]?) -> Void) = { posts in
+//    guard let posts = posts else { return }
+//
+//}
 
 
 func userNew(user: User?) {
@@ -37,10 +37,10 @@ public let dataProvidersUser = DataProviders.shared.usersDataProvider
 //public var postsFeed: () = posts.feed(queue: queue, handler: postsHandler)
 
 /// Развертывание опционала для публикаций
-func selectPosts(posts: [Post]?) -> [Post] {
-    guard let posts = posts else { return [Post]() }
-    return posts
-}
+//func selectPosts(posts: [Post]?) -> [Post] {
+//    guard let posts = posts else { return [Post]() }
+//    return posts
+//}
 
 
 /// Развертывание опционала для пользователя
@@ -50,9 +50,9 @@ func selectPosts(posts: [Post]?) -> [Post] {
 //    selectUser = user
 //}
 
-func selectUsers(users: [User]?) -> [User] {
-    guard let users = users else {
-        return [User]()
-    }
-    return users
-}
+//func selectUsers(users: [User]?) -> [User] {
+//    guard let users = users else {
+//        return [User]()
+//    }
+//    return users
+//}

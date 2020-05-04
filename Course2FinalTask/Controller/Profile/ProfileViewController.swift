@@ -11,8 +11,13 @@ import DataProvider
 
 final class ProfileViewController: UIViewController, NibInit {
     
-    var userProfile: User?
-    var postsProfile: [Post] = []
+    var userProfile: User? {
+        didSet {
+            setupViewController()
+        }
+    }
+    
+    var postsProfile: [Post]?
     
     @IBOutlet weak private var profileCollectionView: UICollectionView! {
         willSet {
@@ -23,16 +28,21 @@ final class ProfileViewController: UIViewController, NibInit {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        setupViewController()
+
+     setupViewController()
+
     }
+    
+
 }
 
 //MARK: DataSourse
 extension ProfileViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return selectPosts(posts: postsProfile).count
+        guard let postsProfile = postsProfile else { return [Post]().count }
+        print(postsProfile.count)
+        return postsProfile.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -62,7 +72,10 @@ extension ProfileViewController: UICollectionViewDelegateFlowLayout {
             assertionFailure()
             return
         }
-        let post = selectPosts(posts: postsProfile)[indexPath.row]
+
+        guard let postsProfile = postsProfile else { return }
+        let post = postsProfile[indexPath.row]
+        /// установка изображений
         cell.setImageCell(post: post)
     }
     
@@ -73,6 +86,7 @@ extension ProfileViewController: UICollectionViewDelegateFlowLayout {
         
         //        view.setHeader(user: selectUser(user: userProfile))
         guard let userProfile = userProfile else { return }
+        /// устновка Хедера
         view.setHeader(user: userProfile)
         view.delegate = self
     }
@@ -87,18 +101,48 @@ extension ProfileViewController: UICollectionViewDelegateFlowLayout {
 extension ProfileViewController {
     
     func setupViewController() {
-        //        if userProfile == nil {
-        //            userProfile = currentUser
-        //        }
-        view.backgroundColor = viewBackgroundColor
-        title = userProfile?.username
-        tabBarItem.title = ControllerSet.profileViewController
-        //        postsProfile = posts.findPosts(by: selectUser(user: userProfile).id)
-        guard let userProfile = userProfile?.id else { return }
-        dataProvidersPosts.findPosts(by: userProfile, queue: queue) { post in
-            guard let post = post else { return }
-            self.postsProfile = post
+        
+        
+        if userProfile == nil {
             
+            dataProvidersUser.currentUser(queue: queue) { [weak self] user in
+                guard let user = user else { return }
+                print(user)
+                self?.userProfile = user
+
+//                DispatchQueue.main.async {
+//                    self?.view.backgroundColor = viewBackgroundColor
+//                    self?.title = self?.userProfile?.username
+//                    self?.tabBarItem.title = ControllerSet.profileViewController
+//                    self?.profileCollectionView.reloadData()
+//                }
+            }
+        }
+        
+        DispatchQueue.main.async {
+            self.view.backgroundColor = viewBackgroundColor
+            self.title = self.userProfile?.username
+            self.tabBarItem.title = ControllerSet.profileViewController
+            self.profileCollectionView.reloadData()
+        }
+        
+//        view.backgroundColor = viewBackgroundColor
+//        title = userProfile?.username
+//        tabBarItem.title = ControllerSet.profileViewController
+        
+        guard let userProfile = userProfile?.id else {
+            print("ТУТУТУ")
+            return }
+        dataProvidersPosts.findPosts(by: userProfile, queue: queue) { [weak self] post in
+
+            guard let post = post else { return }
+            print("findPosts \(post)")
+            self?.postsProfile = post
+            
+            DispatchQueue.main.async {
+                self?.profileCollectionView.reloadData()
+            }
+
         }
     }
 }
@@ -110,7 +154,7 @@ extension ProfileViewController: ProfileHeaderDelegate {
         let userListViewController = UserListViewController.initFromNib()
         //        guard let followers = dataProvidersUser.usersFollowedByUser(with: selectUser(user: userProfile).id) else { return }
         guard let userProfile = userProfile?.id else { return }
-    
+        
         dataProvidersUser.usersFollowedByUser(with: userProfile, queue: queue) { users in
             guard let users = users else { return }
             userListViewController.usersList = users
