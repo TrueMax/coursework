@@ -12,7 +12,7 @@ import DataProvider
 
 final class FeedViewController: UIViewController, NibInit {
     
-    var currentUser: User?
+//    var currentUser: User?
     var postsArray: [Post] = []
     
     @IBOutlet weak private var feedCollectionView: UICollectionView!
@@ -31,17 +31,15 @@ final class FeedViewController: UIViewController, NibInit {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-           dataProvidersPosts.feed(queue: queue) { posts in
-                 guard let posts = posts else { return }
-            print(posts.count)
-            self.postsArray = posts
+        dataProvidersPosts.feed(queue: queue) { [weak self] posts in
+            guard let posts = posts else { return }
+            self?.postsArray = posts
+            
             DispatchQueue.main.async {
-                print("Test")
-                
-                self.feedCollectionView.reloadData()
+                self?.feedCollectionView.reloadData()
             }
-                 
-             }
+            
+        }
         
         title = ControllerSet.feedViewController
     }
@@ -68,29 +66,29 @@ extension FeedViewController: UICollectionViewDelegateFlowLayout {
             return
         }
         //        let post = postsFeed[indexPath.row]
-        dataProvidersPosts.feed(queue: queue) { posts in
+        dataProvidersPosts.feed(queue: queue) { [weak self] posts in
             guard let posts = posts else { return }
-            self.postsArray = posts
+            self?.postsArray = posts
         }
         let post = postsArray[indexPath.row]
-  
-            cell.setupFeed(post: post)
-            cell.delegate = self
-
+        
+        cell.setupFeed(post: post)
+        cell.delegate = self
+        
         
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let width = collectionView.frame.width
         
-        dataProvidersPosts.feed(queue: queue) { posts in
+        dataProvidersPosts.feed(queue: queue) { [weak self] posts in
             guard let posts = posts else { return }
-            self.postsArray = posts
+            self?.postsArray = posts
         }
         
         let post = postsArray[indexPath.row]
         let estimatedFrame = NSString(string: post.description).boundingRect(with: CGSize(width: width - 8, height: width - 8), options: .usesLineFragmentOrigin, attributes: nil, context: nil)
-       
+        
         return CGSize(width: width, height: estimatedFrame.height + width + 130)
     }
 }
@@ -133,12 +131,14 @@ extension FeedViewController: FeedCollectionViewProtocol {
         
         guard let indexPath = feedCollectionView.indexPath(for: cell) else { return }
         
-        dataProvidersPosts.feed(queue: queue) { post in
+        dataProvidersPosts.feed(queue: queue) { [weak self] post in
             guard let post = post else { return }
-            self.postsArray = post
+            self?.postsArray = post
         }
         
         let postID = postsArray[indexPath.row].id
+        
+        //TODO: Разобраться с лайками
         dataProvidersPosts.unlikePost(with: postID, queue: queue) { unlikePost in
             guard let unlikePost = unlikePost else { return }
             //            self = unlikePost
@@ -177,9 +177,9 @@ extension FeedViewController: FeedCollectionViewProtocol {
         
         guard let indexPath = feedCollectionView.indexPath(for: cell) else { return }
         
-        dataProvidersPosts.feed(queue: queue) { post in
+        dataProvidersPosts.feed(queue: queue) { [weak self] post in
             guard let post = post else { return }
-            self.postsArray = post
+            self?.postsArray = post
         }
         
         //        let currentPostID = postsFeed[indexPath.row].id
