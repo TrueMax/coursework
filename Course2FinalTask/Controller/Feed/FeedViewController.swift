@@ -15,6 +15,14 @@ final class FeedViewController: UIViewController, NibInit {
 //    var currentUser: User?
     var postsArray: [Post] = []
     
+    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     @IBOutlet weak private var feedCollectionView: UICollectionView!
         {
         willSet {
@@ -98,7 +106,10 @@ extension FeedViewController: FeedCollectionViewProtocol {
     
     /// открывает профиль пользователя
     func openUserProfile(cell: FeedCollectionViewCell) {
-        let profileViewController = ProfileViewController.initFromNib()
+        guard let navController = tabBarController?.viewControllers?[2] as? UINavigationController else { return }
+        guard let profileViewController = navController.topViewController as? ProfileViewController else { return }
+        
+        //ProfileViewController.initFromNib()
         guard let indexPath = feedCollectionView.indexPath(for: cell) else { return }
         
         let currentPost = postsArray[indexPath.row]
@@ -124,7 +135,7 @@ extension FeedViewController: FeedCollectionViewProtocol {
         //        profileViewController.userProfile = author
         //        profileViewController.postsProfile = postsArray
         
-        self.navigationController?.pushViewController(profileViewController, animated: true)
+        navController.pushViewController(profileViewController, animated: true)
     }
     /// ставит лайк на публикацию
     func likePost(cell: FeedCollectionViewCell) {

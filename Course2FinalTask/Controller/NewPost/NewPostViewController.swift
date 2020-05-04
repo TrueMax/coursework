@@ -16,7 +16,14 @@ class NewPostViewController: UIViewController, NibInit {
         // Do any additional setup after loading the view.
     }
 
-
+    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     /*
     // MARK: - Navigation
 

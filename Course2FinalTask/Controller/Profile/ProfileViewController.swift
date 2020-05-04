@@ -18,6 +18,15 @@ final class ProfileViewController: UIViewController, NibInit {
     }
     var postsProfile: [Post]?
     
+    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    
     @IBOutlet weak private var profileCollectionView: UICollectionView! {
         willSet {
             newValue.register(nibCell: ProfileCollectionViewCell.self)
