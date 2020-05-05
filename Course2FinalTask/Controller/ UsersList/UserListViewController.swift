@@ -33,8 +33,8 @@ class UserListViewController: UIViewController, NibInit {
 extension UserListViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-//        selectUsers(users: usersList).count
-        1
+        selectUsers(users: usersList).count
+//        1
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -50,14 +50,15 @@ extension UserListViewController: UITableViewDelegate {
             assertionFailure()
             return }
         
-//        let user = selectUsers(users: usersList)[indexPath.row]
-//        cell.setupList(user: user)
+        let user = selectUsers(users: usersList)[indexPath.row]
+        cell.setupList(user: user)
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//        let selectUser = selectUsers(users: usersList)[indexPath.row]
+        let selectUser = selectUsers(users: usersList)[indexPath.row]
+
         let profileViewController = ProfileViewController.initFromNib()
-//        profileViewController.userProfile = selectUser
+        profileViewController.userProfile = selectUser
         self.navigationController?.pushViewController(profileViewController, animated: true)
         userListTableView.deselectRow(at: indexPath, animated: true)
     }

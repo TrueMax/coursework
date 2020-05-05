@@ -11,3 +11,5 @@ import UIKit
 let lightGrayColor = UIColor(named: "lightGrayColor")
 let defaultTintColor =  UIColor(named: "defaultTintColor")
 let viewBackgroundColor = UIColor(named: "viewBackgroundColor")
+
+

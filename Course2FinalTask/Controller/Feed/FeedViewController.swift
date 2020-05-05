@@ -12,7 +12,6 @@ import DataProvider
 
 final class FeedViewController: UIViewController, NibInit {
     
-//    var currentUser: User?
     var postsArray: [Post] = []
     
     @IBOutlet weak private var feedCollectionView: UICollectionView!
@@ -38,7 +37,6 @@ final class FeedViewController: UIViewController, NibInit {
             DispatchQueue.main.async {
                 self?.feedCollectionView.reloadData()
             }
-            
         }
         
         title = ControllerSet.feedViewController
@@ -65,11 +63,7 @@ extension FeedViewController: UICollectionViewDelegateFlowLayout {
             assertionFailure()
             return
         }
-        //        let post = postsFeed[indexPath.row]
-        dataProvidersPosts.feed(queue: queue) { [weak self] posts in
-            guard let posts = posts else { return }
-            self?.postsArray = posts
-        }
+
         let post = postsArray[indexPath.row]
         
         cell.setupFeed(post: post)
@@ -80,11 +74,6 @@ extension FeedViewController: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let width = collectionView.frame.width
-        
-        dataProvidersPosts.feed(queue: queue) { [weak self] posts in
-            guard let posts = posts else { return }
-            self?.postsArray = posts
-        }
         
         let post = postsArray[indexPath.row]
         let estimatedFrame = NSString(string: post.description).boundingRect(with: CGSize(width: width - 8, height: width - 8), options: .usesLineFragmentOrigin, attributes: nil, context: nil)
@@ -108,15 +97,20 @@ extension FeedViewController: FeedCollectionViewProtocol {
             guard let user = user else { return }
             
             profileViewController.userProfile = user
-            
         })
         
         guard let authorID = profileViewController.userProfile?.id else { return }
         
         //        let authorPosts = postsArray.findPosts(by: author.id)
-        dataProvidersPosts.findPosts(by: authorID, queue: queue) { posts in
-            guard let posts = posts else { return }
-            profileViewController.postsProfile = posts
+//        dataProvidersPosts.findPosts(by: authorID, queue: queue) { posts in
+//            guard let posts = posts else { return }
+//            profileViewController.postsProfile = posts
+//            
+//            DispatchQueue.main.async {
+//                self.navigationController?.pushViewController(profileViewController, animated: true)
+//                profileViewController.reloadInputViews()
+//                }
+//            }
             
         }
         
@@ -124,31 +118,32 @@ extension FeedViewController: FeedCollectionViewProtocol {
         //        profileViewController.userProfile = author
         //        profileViewController.postsProfile = postsArray
         
-        self.navigationController?.pushViewController(profileViewController, animated: true)
-    }
+//        self.navigationController?.pushViewController(profileViewController, animated: true)
+//    }
+    
     /// ставит лайк на публикацию
     func likePost(cell: FeedCollectionViewCell) {
         
         guard let indexPath = feedCollectionView.indexPath(for: cell) else { return }
         
-        dataProvidersPosts.feed(queue: queue) { [weak self] post in
-            guard let post = post else { return }
-            self?.postsArray = post
-        }
+//        dataProvidersPosts.feed(queue: queue) { [weak self] post in
+//            guard let post = post else { return }
+//            self?.postsArray = post
+//        }
         
         let postID = postsArray[indexPath.row].id
         
         //TODO: Разобраться с лайками
-        dataProvidersPosts.unlikePost(with: postID, queue: queue) { unlikePost in
-            guard let unlikePost = unlikePost else { return }
-            //            self = unlikePost
-            
-        }
+//        dataProvidersPosts.unlikePost(with: postID, queue: queue) { unlikePost in
+//            guard let unlikePost = unlikePost else { return }
+//            //            self = unlikePost
+//
+//        }
         
-        dataProvidersPosts.likePost(with: postID, queue: queue) { likePost in
-            guard let unlikePost = likePost else { return }
-            //            self.post = unlikePost
-        }
+//        dataProvidersPosts.likePost(with: postID, queue: queue) { likePost in
+//            guard let unlikePost = likePost else { return }
+//            //            self.post = unlikePost
+//        }
         
         guard cell.likeButton.tintColor == lightGrayColor else {
             //            guard post.currentUserLikesThisPost else { return }
@@ -177,10 +172,6 @@ extension FeedViewController: FeedCollectionViewProtocol {
         
         guard let indexPath = feedCollectionView.indexPath(for: cell) else { return }
         
-        dataProvidersPosts.feed(queue: queue) { [weak self] post in
-            guard let post = post else { return }
-            self?.postsArray = post
-        }
         
         //        let currentPostID = postsFeed[indexPath.row].id
         let currentPostID = postsArray[indexPath.row].id

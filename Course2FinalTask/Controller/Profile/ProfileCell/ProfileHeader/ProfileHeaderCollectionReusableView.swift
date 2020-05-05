@@ -55,7 +55,6 @@ extension ProfileHeaderCollectionReusableView {
 
 //MARK: TapGestureRecognizer
 private extension ProfileHeaderCollectionReusableView {
-    
     func setupTapGestureRecognizer() {
         let gestureFollowersTap = UITapGestureRecognizer(target: self, action: #selector(followersTap))
         followersLabel.addGestureRecognizer(gestureFollowersTap)

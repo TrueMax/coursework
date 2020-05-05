@@ -35,7 +35,7 @@ private extension AppDelegate {
         let profileNavigationController = UINavigationController(rootViewController: profileViewController)
         
         let newPostViewController = NewPostViewController.initFromNib()
-        newPostViewController.tabBarController?.title = ControllerSet.newPostViewController
+        newPostViewController.tabBarItem.title = ControllerSet.newPostViewController
         newPostViewController.tabBarItem.image = imageNewPostViewController
         let newNavigationController = UINavigationController(rootViewController: newPostViewController)
         

@@ -28,12 +28,10 @@ final class ProfileViewController: UIViewController, NibInit {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-     setupViewController()
-
+        
+        setupViewController()
+        
     }
-    
-
 }
 
 //MARK: DataSourse
@@ -46,7 +44,6 @@ extension ProfileViewController: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        
         return collectionView.dequeue(cell: ProfileCollectionViewCell.self, for: indexPath)
     }
     
@@ -72,7 +69,7 @@ extension ProfileViewController: UICollectionViewDelegateFlowLayout {
             assertionFailure()
             return
         }
-
+        
         guard let postsProfile = postsProfile else { return }
         let post = postsProfile[indexPath.row]
         /// установка изображений
@@ -83,8 +80,7 @@ extension ProfileViewController: UICollectionViewDelegateFlowLayout {
         guard let view = view as? ProfileHeaderCollectionReusableView else {
             assertionFailure()
             return  }
-        
-        //        view.setHeader(user: selectUser(user: userProfile))
+
         guard let userProfile = userProfile else { return }
         /// устновка Хедера
         view.setHeader(user: userProfile)
@@ -95,6 +91,7 @@ extension ProfileViewController: UICollectionViewDelegateFlowLayout {
         let size = profileCollectionView.bounds.width / 3
         return CGSize(width: size, height: size)
     }
+    
 }
 
 //MARK: setViewController
@@ -102,20 +99,10 @@ extension ProfileViewController {
     
     func setupViewController() {
         
-        
         if userProfile == nil {
-            
             dataProvidersUser.currentUser(queue: queue) { [weak self] user in
                 guard let user = user else { return }
-                print(user)
                 self?.userProfile = user
-
-//                DispatchQueue.main.async {
-//                    self?.view.backgroundColor = viewBackgroundColor
-//                    self?.title = self?.userProfile?.username
-//                    self?.tabBarItem.title = ControllerSet.profileViewController
-//                    self?.profileCollectionView.reloadData()
-//                }
             }
         }
         
@@ -123,18 +110,12 @@ extension ProfileViewController {
             self.view.backgroundColor = viewBackgroundColor
             self.title = self.userProfile?.username
             self.tabBarItem.title = ControllerSet.profileViewController
-            self.profileCollectionView.reloadData()
         }
         
-//        view.backgroundColor = viewBackgroundColor
-//        title = userProfile?.username
-//        tabBarItem.title = ControllerSet.profileViewController
         
-        guard let userProfile = userProfile?.id else {
-            print("ТУТУТУ")
-            return }
+        guard let userProfile = userProfile?.id else { return }
+        
         dataProvidersPosts.findPosts(by: userProfile, queue: queue) { [weak self] post in
-
             guard let post = post else { return }
             print("findPosts \(post)")
             self?.postsProfile = post
@@ -142,7 +123,6 @@ extension ProfileViewController {
             DispatchQueue.main.async {
                 self?.profileCollectionView.reloadData()
             }
-
         }
     }
 }
@@ -152,35 +132,33 @@ extension ProfileViewController: ProfileHeaderDelegate {
     
     func openFollowersList() {
         let userListViewController = UserListViewController.initFromNib()
-        //        guard let followers = dataProvidersUser.usersFollowedByUser(with: selectUser(user: userProfile).id) else { return }
-        guard let userProfile = userProfile?.id else { return }
         
+        guard let userProfile = userProfile?.id else { return }
         dataProvidersUser.usersFollowedByUser(with: userProfile, queue: queue) { users in
             guard let users = users else { return }
             userListViewController.usersList = users
             
-            userListViewController.navigationItemTitle = NamesItemTitle.followers
-            self.navigationController?.pushViewController(userListViewController, animated: true)
+            DispatchQueue.main.async {
+                userListViewController.navigationItemTitle = NamesItemTitle.followers
+                self.navigationController?.pushViewController(userListViewController, animated: true)
+            }
         }
-        //        userListViewController.usersList = followers
-        //        userListViewController.navigationItemTitle = NamesItemTitle.followers
-        //        self.navigationController?.pushViewController(userListViewController, animated: true)
     }
     
     func openFollowingList() {
         let userListViewController = UserListViewController.initFromNib()
+        
         guard let userProfile = userProfile?.id else { return }
+        
         dataProvidersUser.usersFollowingUser(with: userProfile, queue: queue, handler: { users in
             guard let users = users else { return }
             
             userListViewController.usersList = users
-            userListViewController.navigationItemTitle = NamesItemTitle.following
-            self.navigationController?.pushViewController(userListViewController, animated: true)
-        })
-        
-        //        userListViewController.usersList = following
-        //        userListViewController.navigationItemTitle = NamesItemTitle.following
-        //        self.navigationController?.pushViewController(userListViewController, animated: true)
-        
+            
+            DispatchQueue.main.async {
+                userListViewController.navigationItemTitle = NamesItemTitle.following
+                self.navigationController?.pushViewController(userListViewController, animated: true)
+            }
+        })        
     }
 }
