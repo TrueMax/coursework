@@ -17,7 +17,7 @@ final class ProfileViewController: UIViewController, NibInit {
         }
     }
     
-    var postsProfile: [Post]?
+    private var postsProfile: [Post]?
     
     @IBOutlet weak private var profileCollectionView: UICollectionView! {
         willSet {
@@ -39,7 +39,6 @@ extension ProfileViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         guard let postsProfile = postsProfile else { return [Post]().count }
-        print(postsProfile.count)
         return postsProfile.count
     }
     
@@ -104,23 +103,22 @@ extension ProfileViewController {
                 guard let user = user else { return }
                 self?.userProfile = user
             }
+            
+            DispatchQueue.main.async {
+                      self.view.backgroundColor = viewBackgroundColor
+                      self.title = self.userProfile?.username
+                  }
         }
-        
-        DispatchQueue.main.async {
-            self.view.backgroundColor = viewBackgroundColor
-            self.title = self.userProfile?.username
-            self.tabBarItem.title = ControllerSet.profileViewController
-        }
-        
         
         guard let userProfile = userProfile?.id else { return }
         
         dataProvidersPosts.findPosts(by: userProfile, queue: queue) { [weak self] post in
             guard let post = post else { return }
-            print("findPosts \(post)")
             self?.postsProfile = post
             
             DispatchQueue.main.async {
+                self?.view.backgroundColor = viewBackgroundColor
+                self?.title = self?.userProfile?.username
                 self?.profileCollectionView.reloadData()
             }
         }
