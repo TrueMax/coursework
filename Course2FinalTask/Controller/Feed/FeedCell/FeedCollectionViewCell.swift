@@ -19,7 +19,7 @@ final class FeedCollectionViewCell: UICollectionViewCell, NibInit {
     
     @IBOutlet var likeButton: UIButton!
     @IBOutlet private var userNameLabel: UILabel!
-    @IBOutlet private var dateLabel: UILabel!
+    @IBOutlet private var dateLabel: UILabel! 
     @IBOutlet private var likesLabel: UILabel!
     @IBOutlet private var descriptionLabel: UILabel!
     @IBOutlet private var avatarImageView: UIImageView!
@@ -41,7 +41,6 @@ final class FeedCollectionViewCell: UICollectionViewCell, NibInit {
         
         setupFonts()
         setupTapGestureRecognizer()
-        
     }
     
     /// настройка ленты
@@ -59,6 +58,7 @@ final class FeedCollectionViewCell: UICollectionViewCell, NibInit {
             return
         }
         likeButton.tintColor = defaultTintColor
+        
     }
 }
 
@@ -118,6 +118,7 @@ private extension FeedCollectionViewCell {
         
         /// жест для перехода по аватару
         let gestureAvatarTap = UITapGestureRecognizer(target: self, action: #selector(goToProfile))
+        
         avatarImageView.addGestureRecognizer(gestureAvatarTap)
         
         /// жест для перехода по имени и дате(использовал SteakView)

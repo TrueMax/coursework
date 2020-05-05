@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="16096" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina4_0" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="ProfileViewController" customModule="Course2FinalTask" customModuleProvider="target">
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="ProfileViewController" customModule="Course3FinalTask" customModuleProvider="target">
             <connections>
+                <outlet property="activityIndicator" destination="U74-8w-Nvx" id="0wN-Kh-FCK"/>
+                <outlet property="indicatorView" destination="PfU-mp-BCY" id="HjS-Yq-aJJ"/>
                 <outlet property="profileCollectionView" destination="4MS-Yg-7fa" id="BRQ-Oz-4Dz"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
             </connections>
@@ -33,12 +35,36 @@
                         <outlet property="delegate" destination="-1" id="s7b-sj-zEw"/>
                     </connections>
                 </collectionView>
+                <view hidden="YES" clipsSubviews="YES" alpha="0.59999999999999998" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" translatesAutoresizingMaskIntoConstraints="NO" id="PfU-mp-BCY">
+                    <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                    <subviews>
+                        <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" preservesSuperviewLayoutMargins="YES" hidesWhenStopped="YES" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="U74-8w-Nvx">
+                            <rect key="frame" x="77" y="201" width="167" height="167"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="167" id="58H-2M-PUK"/>
+                                <constraint firstAttribute="width" constant="167" id="6XT-oL-EJu"/>
+                            </constraints>
+                            <color key="color" systemColor="systemGrayColor" red="0.5568627451" green="0.5568627451" blue="0.57647058819999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        </activityIndicatorView>
+                    </subviews>
+                    <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                    <constraints>
+                        <constraint firstItem="U74-8w-Nvx" firstAttribute="centerX" secondItem="PfU-mp-BCY" secondAttribute="centerX" id="THU-lt-DCP"/>
+                        <constraint firstItem="U74-8w-Nvx" firstAttribute="centerY" secondItem="PfU-mp-BCY" secondAttribute="centerY" id="hHj-p1-AN8"/>
+                    </constraints>
+                </view>
             </subviews>
             <constraints>
                 <constraint firstItem="4MS-Yg-7fa" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" id="19h-9a-Ncf"/>
+                <constraint firstItem="PfU-mp-BCY" firstAttribute="top" secondItem="fnl-2z-Ty3" secondAttribute="top" id="A7c-1x-y5P"/>
                 <constraint firstItem="4MS-Yg-7fa" firstAttribute="top" secondItem="fnl-2z-Ty3" secondAttribute="top" id="Aow-k0-M9X"/>
                 <constraint firstItem="4MS-Yg-7fa" firstAttribute="bottom" secondItem="fnl-2z-Ty3" secondAttribute="bottom" id="ISE-1J-P14"/>
+                <constraint firstItem="PfU-mp-BCY" firstAttribute="top" secondItem="4MS-Yg-7fa" secondAttribute="top" id="J2h-Ix-hez"/>
+                <constraint firstItem="PfU-mp-BCY" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" id="SHv-Zj-Xez"/>
+                <constraint firstAttribute="trailing" secondItem="PfU-mp-BCY" secondAttribute="trailing" id="dci-ah-5PR"/>
+                <constraint firstItem="PfU-mp-BCY" firstAttribute="leading" secondItem="4MS-Yg-7fa" secondAttribute="leading" id="ke1-xH-mAy"/>
                 <constraint firstItem="4MS-Yg-7fa" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="s0K-2T-aOH"/>
+                <constraint firstAttribute="bottom" secondItem="PfU-mp-BCY" secondAttribute="bottom" id="swS-S0-gGd"/>
             </constraints>
             <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
             <point key="canvasLocation" x="138.75" y="136.26760563380282"/>

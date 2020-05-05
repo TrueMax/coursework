@@ -106,36 +106,19 @@ extension FeedViewController: FeedCollectionViewProtocol {
     
     /// открывает профиль пользователя
     func openUserProfile(cell: FeedCollectionViewCell) {
+        
         guard let navController = tabBarController?.viewControllers?[2] as? UINavigationController else { return }
         guard let profileViewController = navController.topViewController as? ProfileViewController else { return }
         
-        //ProfileViewController.initFromNib()
         guard let indexPath = feedCollectionView.indexPath(for: cell) else { return }
         
-        let currentPost = postsArray[indexPath.row]
+        let currentPost = postsArray[indexPath.item]
         
+        profileViewController.currentUserID = currentPost.author
         
-        dataProvidersUser.user(with: currentPost.author, queue: queue, handler: { user in
-            guard let user = user else { return }
-            
-            profileViewController.userProfile = user
-            
-        })
-        
-        guard let authorID = profileViewController.userProfile?.id else { return }
-        
-        //        let authorPosts = postsArray.findPosts(by: author.id)
-        dataProvidersPosts.findPosts(by: authorID, queue: queue) { posts in
-            guard let posts = posts else { return }
-            profileViewController.postsProfile = posts
-            
+        DispatchQueue.main.async {
+            self.tabBarController?.selectedViewController = navController
         }
-        
-        //        let profileViewController = ProfileViewController.initFromNib()
-        //        profileViewController.userProfile = author
-        //        profileViewController.postsProfile = postsArray
-        
-        navController.pushViewController(profileViewController, animated: true)
     }
     /// ставит лайк на публикацию
     func likePost(cell: FeedCollectionViewCell) {
@@ -216,7 +199,7 @@ extension FeedViewController: FeedCollectionViewProtocol {
         
         guard !userMarkerPost.isEmpty else { return }
         
-        let userListViewController = UserListViewController.initFromNib()
+        let userListViewController = UserListViewController()
         userListViewController.usersList = userMarkerPost
         userListViewController.navigationItemTitle = NamesItemTitle.likes
         self.navigationController?.pushViewController(userListViewController, animated: true)

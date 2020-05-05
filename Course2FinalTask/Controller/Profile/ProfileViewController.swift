@@ -9,16 +9,22 @@
 import UIKit
 import DataProvider
 
-final class ProfileViewController: UIViewController, NibInit {
+final class ProfileViewController: UIViewController, ProfileHeaderDelegate {
     
-    var userProfile: User? {
+    var currentUserID: User.Identifier? {
         didSet {
             setupViewController()
         }
     }
+    
+    var userProfile: User?
     var postsProfile: [Post]?
+    let alert: AlertFactory
     
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
+        
+        alert = AlertFactory()
+        
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -26,6 +32,24 @@ final class ProfileViewController: UIViewController, NibInit {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        startActivityIndicator()
+    }
+    
+    func startActivityIndicator() {
+        indicatorView.isHidden = false
+        activityIndicator.startAnimating()
+    }
+    
+    func stopActivityIndicator() {
+        activityIndicator.stopAnimating()
+        indicatorView.isHidden = true
+    }
+    
+    @IBOutlet weak var indicatorView: UIView!
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
     @IBOutlet weak private var profileCollectionView: UICollectionView! {
         willSet {
@@ -33,15 +57,6 @@ final class ProfileViewController: UIViewController, NibInit {
             newValue.register(nibSupplementaryView: ProfileHeaderCollectionReusableView.self, kind: UICollectionView.elementKindSectionHeader)
         }
     }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-     setupViewController()
-
-    }
-    
-
 }
 
 //MARK: DataSourse
@@ -55,7 +70,14 @@ extension ProfileViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        return collectionView.dequeue(cell: ProfileCollectionViewCell.self, for: indexPath)
+        let cell = collectionView.dequeue(cell: ProfileCollectionViewCell.self, for: indexPath)
+        
+        guard let postsProfile = postsProfile else { return UICollectionViewCell() }
+        let post = postsProfile[indexPath.item]
+        /// установка изображений
+        cell.setImageCell(post: post)
+        
+        return cell
     }
     
     func collectionView(_ collectionView: UICollectionView,
@@ -74,18 +96,6 @@ extension ProfileViewController: UICollectionViewDataSource {
 
 //MARK: Delegate FlowLayout
 extension ProfileViewController: UICollectionViewDelegateFlowLayout {
-    
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        guard let cell = cell as? ProfileCollectionViewCell else {
-            assertionFailure()
-            return
-        }
-
-        guard let postsProfile = postsProfile else { return }
-        let post = postsProfile[indexPath.row]
-        /// установка изображений
-        cell.setImageCell(post: post)
-    }
     
     func collectionView(_ collectionView: UICollectionView, willDisplaySupplementaryView view: UICollectionReusableView, forElementKind elementKind: String, at indexPath: IndexPath) {
         guard let view = view as? ProfileHeaderCollectionReusableView else {
@@ -110,56 +120,47 @@ extension ProfileViewController {
     
     func setupViewController() {
         
-        
-        if userProfile == nil {
-            
-            dataProvidersUser.currentUser(queue: queue) { [weak self] user in
-                guard let user = user else { return }
-                print(user)
-                self?.userProfile = user
-
-//                DispatchQueue.main.async {
-//                    self?.view.backgroundColor = viewBackgroundColor
-//                    self?.title = self?.userProfile?.username
-//                    self?.tabBarItem.title = ControllerSet.profileViewController
-//                    self?.profileCollectionView.reloadData()
-//                }
-            }
+        if isViewLoaded { startActivityIndicator()
         }
         
-        DispatchQueue.main.async {
-            self.view.backgroundColor = viewBackgroundColor
-            self.title = self.userProfile?.username
-            self.tabBarItem.title = ControllerSet.profileViewController
-            self.profileCollectionView.reloadData()
-        }
-        
-//        view.backgroundColor = viewBackgroundColor
-//        title = userProfile?.username
-//        tabBarItem.title = ControllerSet.profileViewController
-        
-        guard let userProfile = userProfile?.id else {
-            print("ТУТУТУ")
-            return }
-        dataProvidersPosts.findPosts(by: userProfile, queue: queue) { [weak self] post in
-
-            guard let post = post else { return }
-            print("findPosts \(post)")
-            self?.postsProfile = post
-            
-            DispatchQueue.main.async {
-                self?.profileCollectionView.reloadData()
+        dataProvidersUser.user(with: currentUserID!, queue: queue) { user in
+            guard let user = user else {
+                DispatchQueue.main.async {
+                    self.stopActivityIndicator()
+                    self.present(self.alert.createAlert(error: .noUserError), animated: false, completion: nil)
+                }
+                return
             }
-
+            self.userProfile = user
+            
+            dataProvidersPosts.findPosts(by: user.id, queue: queue) { post in
+                
+                if let post = post {
+                    self.postsProfile = post
+                    
+                    DispatchQueue.main.async {
+                        self.stopActivityIndicator()
+                        self.view.backgroundColor = viewBackgroundColor
+                        self.title = self.userProfile?.username
+                        self.tabBarItem.title = ControllerSet.profileViewController
+                        self.profileCollectionView.reloadData()
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        self.stopActivityIndicator()
+                        self.present(self.alert.createAlert(error: .noPostError), animated: false, completion: nil)
+                    }
+                }
+            }
         }
     }
 }
 
 //MARK: ProfileHeaderDelegate
-extension ProfileViewController: ProfileHeaderDelegate {
+extension ProfileViewController {
     
     func openFollowersList() {
-        let userListViewController = UserListViewController.initFromNib()
+        let userListViewController = UserListViewController()
         //        guard let followers = dataProvidersUser.usersFollowedByUser(with: selectUser(user: userProfile).id) else { return }
         guard let userProfile = userProfile?.id else { return }
         
@@ -176,7 +177,7 @@ extension ProfileViewController: ProfileHeaderDelegate {
     }
     
     func openFollowingList() {
-        let userListViewController = UserListViewController.initFromNib()
+        let userListViewController = UserListViewController()
         guard let userProfile = userProfile?.id else { return }
         dataProvidersUser.usersFollowingUser(with: userProfile, queue: queue, handler: { users in
             guard let users = users else { return }

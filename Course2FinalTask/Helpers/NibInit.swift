@@ -19,10 +19,3 @@ extension NibInit where Self: UIView {
     }
 }
 
-extension NibInit where Self: UIViewController {
-    
-    static func initFromNib() -> Self {
-        let nibName = String(describing: Self.self)
-        return self.init(nibName: nibName, bundle: nil)
-    }
-}
