@@ -36,6 +36,16 @@ final class ProfileViewController: UIViewController, ProfileHeaderDelegate {
         super.viewDidLoad()
         
         startActivityIndicator()
+        
+        dataProvidersUser.currentUser(queue: queue) { user in
+            guard let cUser = user else { return }
+            self.userProfile = cUser
+            dataProvidersPosts.findPosts(by: cUser.id, queue: queue) { posts in
+                guard let cPosts = posts else { return }
+                self.postsProfile = cPosts
+                self.updateUI()
+            }
+        }
     }
     
     func startActivityIndicator() {
@@ -46,6 +56,16 @@ final class ProfileViewController: UIViewController, ProfileHeaderDelegate {
     func stopActivityIndicator() {
         activityIndicator.stopAnimating()
         indicatorView.isHidden = true
+    }
+    
+    func updateUI() {
+        DispatchQueue.main.async {
+            self.stopActivityIndicator()
+            self.view.backgroundColor = viewBackgroundColor
+            self.title = self.userProfile?.username
+            self.tabBarItem.title = ControllerSet.profileViewController
+            self.profileCollectionView.reloadData()
+        }
     }
     
     @IBOutlet weak var indicatorView: UIView!
@@ -137,14 +157,8 @@ extension ProfileViewController {
                 
                 if let post = post {
                     self.postsProfile = post
+                    self.updateUI()
                     
-                    DispatchQueue.main.async {
-                        self.stopActivityIndicator()
-                        self.view.backgroundColor = viewBackgroundColor
-                        self.title = self.userProfile?.username
-                        self.tabBarItem.title = ControllerSet.profileViewController
-                        self.profileCollectionView.reloadData()
-                    }
                 } else {
                     DispatchQueue.main.async {
                         self.stopActivityIndicator()

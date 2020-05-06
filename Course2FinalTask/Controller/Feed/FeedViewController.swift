@@ -61,40 +61,23 @@ extension FeedViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        return collectionView.dequeue(cell: FeedCollectionViewCell.self, for: indexPath)
+        let cell = collectionView.dequeue(cell: FeedCollectionViewCell.self, for: indexPath)
+        let post = postsArray[indexPath.item]
+        
+        cell.setupFeed(post: post)
+        cell.delegate = self
+        
+        return cell
     }
 }
 
 //MARK: DelegateFlowLayout
 extension FeedViewController: UICollectionViewDelegateFlowLayout {
     
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        guard let cell = cell as? FeedCollectionViewCell else {
-            assertionFailure()
-            return
-        }
-        //        let post = postsFeed[indexPath.row]
-        dataProvidersPosts.feed(queue: queue) { [weak self] posts in
-            guard let posts = posts else { return }
-            self?.postsArray = posts
-        }
-        let post = postsArray[indexPath.row]
-        
-        cell.setupFeed(post: post)
-        cell.delegate = self
-        
-        
-    }
-    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let width = collectionView.frame.width
         
-        dataProvidersPosts.feed(queue: queue) { [weak self] posts in
-            guard let posts = posts else { return }
-            self?.postsArray = posts
-        }
-        
-        let post = postsArray[indexPath.row]
+        let post = postsArray[indexPath.item]
         let estimatedFrame = NSString(string: post.description).boundingRect(with: CGSize(width: width - 8, height: width - 8), options: .usesLineFragmentOrigin, attributes: nil, context: nil)
         
         return CGSize(width: width, height: estimatedFrame.height + width + 130)
