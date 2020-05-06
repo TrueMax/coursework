@@ -234,7 +234,7 @@ extension ProfileViewController: UINavigationControllerDelegate {
 extension ProfileViewController: UITabBarControllerDelegate {
     
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
-        if !(viewController === navigationController) {
+        if viewController !== navigationController {
             feedUserID = nil
             navigationController?.popToRootViewController(animated: false)
         }
