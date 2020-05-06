@@ -89,7 +89,7 @@ extension FeedViewController: FeedCollectionViewProtocol {
             
         let currentPost = postsArray[indexPath.item]
             
-        profileViewController.currentUserID = currentPost.author
+        profileViewController.feedUserID = currentPost.author
         
         DispatchQueue.main.async {
             self.tabBarController?.selectedViewController = navController

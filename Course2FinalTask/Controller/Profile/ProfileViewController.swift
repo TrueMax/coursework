@@ -11,41 +11,77 @@ import DataProvider
 
 final class ProfileViewController: UIViewController, ProfileHeaderDelegate {
     
-    var currentUserID: User.Identifier? {
-        didSet {
-            setupViewController()
-        }
-    }
-
+    var feedUserID: User.Identifier?
     var userProfile: User?
     var postsProfile: [Post]?
-    let alert: AlertFactory
-    
-    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
-        
-        alert = AlertFactory()
-        
-        super.init(nibName: nil, bundle: nil)
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
+    lazy var alert: AlertFactory = {
+        return AlertFactory()
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        startActivityIndicator()
+        navigationController?.delegate = self
+        tabBarController?.delegate = self
         
-        if currentUserID == nil {
-            dataProvidersUser.currentUser(queue: queue) { user in
-                guard let cUser = user else { return }
-                self.userProfile = cUser
-                dataProvidersPosts.findPosts(by: cUser.id, queue: queue) { posts in
-                    guard let cPosts = posts else { return }
-                    self.postsProfile = cPosts
-                    self.updateUI()
+        let item = UIBarButtonItem(title: "＜Feed", style: .plain, target: self, action: #selector(returnToFeedController))
+        navigationItem.leftBarButtonItem = item
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        if let id = feedUserID {
+            loadUserByProfile(id: id)
+        } else {
+            loadCurrentUser()
+        }
+    }
+    
+    @objc func returnToFeedController() {
+        feedUserID = nil
+        tabBarController?.selectedIndex = 0
+    }
+    
+    func loadUserByProfile(id: User.Identifier) {
+        
+        startActivityIndicator()
+        feedUserID = id
+        dataProvidersUser.user(with: id, queue: queue) { user in
+            guard let user = user else {
+                self.presentAlert(error: .noUserError)
+                return
+            }
+            self.userProfile = user
+            
+            dataProvidersPosts.findPosts(by: user.id, queue: queue) { posts in
+                guard let cPosts = posts else {
+                    self.presentAlert(error: .noPostError)
+                    return
                 }
+                self.postsProfile = cPosts
+                self.updateUI()
+            }
+        }
+    }
+    
+    func loadCurrentUser() {
+        
+        startActivityIndicator()
+        dataProvidersUser.currentUser(queue: queue) { user in
+            guard let cUser = user else {
+                self.presentAlert(error: .noUserError)
+                return
+            }
+            self.userProfile = cUser
+            
+            dataProvidersPosts.findPosts(by: cUser.id, queue: queue) { posts in
+                guard let cPosts = posts else {
+                    self.presentAlert(error: .noPostError)
+                    return
+                }
+                self.postsProfile = cPosts
+                self.updateUI()
             }
         }
     }
@@ -71,6 +107,13 @@ final class ProfileViewController: UIViewController, ProfileHeaderDelegate {
         }
     }
     
+    func presentAlert(error: DataProviderError) {
+        DispatchQueue.main.async {
+            self.stopActivityIndicator()
+            self.present(self.alert.createAlert(error: error), animated: false, completion: nil)
+        }
+    }
+    
     @IBOutlet weak var indicatorView: UIView!
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
@@ -80,8 +123,6 @@ final class ProfileViewController: UIViewController, ProfileHeaderDelegate {
             newValue.register(nibSupplementaryView: ProfileHeaderCollectionReusableView.self, kind: UICollectionView.elementKindSectionHeader)
         }
     }
-    
-
 }
 
 //MARK: DataSourse
@@ -89,7 +130,6 @@ extension ProfileViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         guard let postsProfile = postsProfile else { return [Post]().count }
-        print(postsProfile.count)
         return postsProfile.count
     }
     
@@ -141,44 +181,6 @@ extension ProfileViewController: UICollectionViewDelegateFlowLayout {
     
 }
 
-//MARK: setViewController
-extension ProfileViewController {
-    
-    func setupViewController() {
-        
-
-        if isViewLoaded {
-            startActivityIndicator()
-        }
-        
-        guard let id = currentUserID else { return }
-        dataProvidersUser.user(with: id, queue: queue) { user in
-            guard let user = user else {
-                DispatchQueue.main.async {
-                    self.stopActivityIndicator()
-                    self.present(self.alert.createAlert(error: .noUserError), animated: false, completion: nil)
-                }
-                return
-            }
-            self.userProfile = user
-            
-            dataProvidersPosts.findPosts(by: user.id, queue: queue) { post in
-                
-                if let post = post {
-                    self.postsProfile = post
-                    self.updateUI()
-                    
-                } else {
-                    DispatchQueue.main.async {
-                        self.stopActivityIndicator()
-                        self.present(self.alert.createAlert(error: .noPostError), animated: false, completion: nil)
-                    }
-                }
-            }
-        }
-    }
-}
-
 //MARK: ProfileHeaderDelegate
 extension ProfileViewController {
     
@@ -215,5 +217,24 @@ extension ProfileViewController {
                 self.navigationController?.pushViewController(userListViewController, animated: true)
             }
         })        
+    }
+}
+
+extension ProfileViewController: UINavigationControllerDelegate {
+    
+    func navigationController(_ navigationController: UINavigationController, didShow viewController: UIViewController, animated: Bool) {
+        if viewController === ProfileViewController.self {
+            updateUI()
+        }
+    }
+}
+
+extension ProfileViewController: UITabBarControllerDelegate {
+    
+    func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
+        if !(viewController === navigationController) {
+            feedUserID = nil
+            navigationController?.popToRootViewController(animated: false)
+        }
     }
 }
