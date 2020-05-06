@@ -18,13 +18,15 @@ final class ProfileViewController: UIViewController, ProfileHeaderDelegate {
         return AlertFactory()
     }()
     
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         navigationController?.delegate = self
         tabBarController?.delegate = self
         
-        let item = UIBarButtonItem(title: "＜Feed", style: .plain, target: self, action: #selector(returnToFeedController))
+        
+        let item = CustomBackButton(target: self, selector: #selector(returnToFeedController), title: "Feed")
         navigationItem.leftBarButtonItem = item
     }
     
@@ -236,5 +238,28 @@ extension ProfileViewController: UITabBarControllerDelegate {
             feedUserID = nil
             navigationController?.popToRootViewController(animated: false)
         }
+    }
+}
+
+class CustomBackButton: UIBarButtonItem {
+    
+    convenience init(target: Any, selector: Selector, title: String) {
+        
+        let button = UIButton(frame: .zero)
+        
+        button.setTitle(title, for: .normal)
+        button.setTitleColor(.systemBlue, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 17)
+        
+        let config = UIImage.SymbolConfiguration(pointSize: 19.0, weight: .semibold, scale: .large)
+        let image = UIImage(systemName: "chevron.left", withConfiguration: config)
+        button.setImage(image, for: .normal)
+        
+        button.addTarget(target, action: selector, for: .touchUpInside)
+        
+        button.imageEdgeInsets = UIEdgeInsets(top: 0.0, left: -18.0, bottom: 0.0, right: 0.0)
+        button.titleEdgeInsets = UIEdgeInsets(top: 0.0, left: -12.0, bottom: 0.0, right: 0.0)
+        
+        self.init(customView: button)
     }
 }
