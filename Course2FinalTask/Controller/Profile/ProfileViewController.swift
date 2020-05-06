@@ -147,10 +147,12 @@ extension ProfileViewController {
     func setupViewController() {
         
 
-        if isViewLoaded { startActivityIndicator()
+        if isViewLoaded {
+            startActivityIndicator()
         }
         
-        dataProvidersUser.user(with: currentUserID!, queue: queue) { user in
+        guard let id = currentUserID else { return }
+        dataProvidersUser.user(with: id, queue: queue) { user in
             guard let user = user else {
                 DispatchQueue.main.async {
                     self.stopActivityIndicator()
