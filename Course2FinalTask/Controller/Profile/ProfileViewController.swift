@@ -37,16 +37,19 @@ final class ProfileViewController: UIViewController, ProfileHeaderDelegate {
         
         startActivityIndicator()
         
-        dataProvidersUser.currentUser(queue: queue) { user in
-            guard let cUser = user else { return }
-            self.userProfile = cUser
-            dataProvidersPosts.findPosts(by: cUser.id, queue: queue) { posts in
-                guard let cPosts = posts else { return }
-                self.postsProfile = cPosts
-                self.updateUI()
+        if currentUserID == nil {
+            dataProvidersUser.currentUser(queue: queue) { user in
+                guard let cUser = user else { return }
+                self.userProfile = cUser
+                dataProvidersPosts.findPosts(by: cUser.id, queue: queue) { posts in
+                    guard let cPosts = posts else { return }
+                    self.postsProfile = cPosts
+                    self.updateUI()
+                }
             }
         }
     }
+        
     
     func startActivityIndicator() {
         indicatorView.isHidden = false

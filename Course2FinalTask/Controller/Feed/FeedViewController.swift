@@ -83,13 +83,13 @@ extension FeedViewController: FeedCollectionViewProtocol {
     func openUserProfile(cell: FeedCollectionViewCell) {
         
         guard let navController = tabBarController?.viewControllers?[2] as? UINavigationController else { return }
-        guard let profileViewController = navController.topViewController as? ProfileViewController else { return }
-        
-        guard let indexPath = feedCollectionView.indexPath(for: cell) else { return }
-        
-        let currentPost = postsArray[indexPath.item]
-        
-        profileViewController.currentUserID = currentPost.author
+        if let profileViewController = navController.topViewController as? ProfileViewController {
+            guard let indexPath = feedCollectionView.indexPath(for: cell) else { return }
+            
+            let currentPost = postsArray[indexPath.item]
+            
+            profileViewController.currentUserID = currentPost.author
+        }
         
         DispatchQueue.main.async {
             self.tabBarController?.selectedViewController = navController

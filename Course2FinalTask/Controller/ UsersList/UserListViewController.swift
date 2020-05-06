@@ -33,6 +33,8 @@ class UserListViewController: UIViewController, NibInit {
 extension UserListViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        guard let usersList = usersList else { return 0 }
+        return usersList.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -43,15 +45,10 @@ extension UserListViewController: UITableViewDataSource {
 //MARK: Delegate
 extension UserListViewController: UITableViewDelegate {
     
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        guard let cell = cell as? UserListTableViewCell else {
-            assertionFailure()
-            return }
-        
-    }
-    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        navController.pushViewController(profileViewController, animated: true)
+        guard let navController = tabBarController?.viewControllers?[2] as? UINavigationController else { return }
+        
+        tabBarController?.selectedViewController = navController
         userListTableView.deselectRow(at: indexPath, animated: true)
     }
 }
