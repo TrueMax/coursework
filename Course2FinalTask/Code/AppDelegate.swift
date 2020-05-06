@@ -25,14 +25,17 @@ private extension AppDelegate {
     func assembly(){
         window = UIWindow(frame: UIScreen.main.bounds)
         
+        let feedViewController = FeedViewController()
         feedViewController.tabBarItem.image = imageFeedViewController
         let feedNavigationController = UINavigationController(rootViewController: feedViewController)
         
+        let profileViewController = ProfileViewController()
         profileViewController.tabBarItem.title = ControllerSet.profileViewController
         profileViewController.tabBarItem.image = imageProfileViewController
         let profileNavigationController = UINavigationController(rootViewController: profileViewController)
         
-        newPostViewController.tabBarItem.title = ControllerSet.newPostViewController
+        let newPostViewController = NewPostViewController()
+        newPostViewController.tabBarController?.title = ControllerSet.newPostViewController
         newPostViewController.tabBarItem.image = imageNewPostViewController
         let newNavigationController = UINavigationController(rootViewController: newPostViewController)
         
