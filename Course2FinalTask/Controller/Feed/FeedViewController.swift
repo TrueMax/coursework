@@ -15,6 +15,9 @@ final class FeedViewController: UIViewController, NibInit {
     var currentUser: User?
     var postsArray: [Post] = []
     
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+    @IBOutlet weak var indicatorView: UIView!
+    
     @IBOutlet weak private var feedCollectionView: UICollectionView!
         {
         willSet {
@@ -31,17 +34,29 @@ final class FeedViewController: UIViewController, NibInit {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        startActivityIndicator()
         dataProvidersPosts.feed(queue: queue) { [weak self] posts in
             guard let posts = posts else { return }
             self?.postsArray = posts
             
             DispatchQueue.main.async {
                 self?.feedCollectionView.reloadData()
+                self?.stopActivityIndicator()
             }
             
         }
         
         title = ControllerSet.feedViewController
+    }
+    
+    func startActivityIndicator() {
+        indicatorView.isHidden = false
+        activityIndicator.startAnimating()
+    }
+    
+    func stopActivityIndicator() {
+        activityIndicator.stopAnimating()
+        indicatorView.isHidden = true
     }
 }
 
